@@ -34,13 +34,13 @@ $(document).mousestop(function() {
             return this.nodeType == Node.TEXT_NODE && !($(this).text().match(/\A\s*\z/))
         });
 
-        $(nodes).wrap('<apertiumnode />');
+        $(nodes).wrap('<apertiumproblocation />');
 
         if (nodes.length == 0) {
             $(nodes).unwrap();
         } else {            
             var text = document.elementFromPoint((curr_ev.pageX - window.pageXOffset), curr_ev.pageY - window.pageYOffset);
-            if (text.nodeName == 'APERTIUMNODE') { 
+            if (text.nodeName == 'APERTIUMPROBLOCATION') { 
                 $(nodes).unwrap();
                 var txt = document.elementFromPoint((curr_ev.pageX - window.pageXOffset), curr_ev.pageY - window.pageYOffset);
                 var prev_txt = document.elementFromPoint((curr_ev.pageX - window.pageXOffset), curr_ev.pageY - window.pageYOffset);
@@ -66,25 +66,35 @@ $(document).mousestop(function() {
                 
                 var disp_txt = $(document.elementFromPoint((curr_ev.pageX - window.pageXOffset), curr_ev.pageY - window.pageYOffset)).text()
                 
-                disp_txt = XRegExp.replace(disp_txt, new XRegExp("\\P{L}+", "g"), "")
+                // disp_txt = XRegExp.replace(disp_txt, new XRegExp("\\P{L}+", "g"), "")
                                 
                 console.log(disp_txt)
                 if(disp_txt != "") {
                     $(".apertium-popup-translate-text").append(disp_txt)
+                    console.log()
                     $(".apertium-popup-translate").css("display","table")
                     var y_offset = 15
-                    if ((curr_ev.pageY + 30) > $(window).height()) {
+                    if ((curr_ev.pageY - window.pageYOffset + 40 + $(".apertium-popup-translate-text").outerHeight()) > $(window).height()) {
                         y_offset = -40
                     }
                     
                     var x_offset = 20
                     
-                    if ((curr_ev.pageX + 140) > $(window).width()) {
-                        x_offset = -60
+                    if ((curr_ev.pageX + 70 + $(".apertium-popup-translate-text").outerWidth()) > $(window).width()) {
+                        x_offset = -$(".apertium-popup-translate-text").outerWidth() + 20 - 60
                     }
-                    $(".apertium-popup-translate").css("left",((curr_ev.pageX + x_offset).toString() + "px"))
                     
-                    $(".apertium-popup-translate").css("top",((curr_ev.pageY + y_offset).toString() + "px"))
+                    if ((curr_ev.pageX + x_offset) < 0) {
+                        $(".apertium-popup-translate").css("left","5px")
+                    } else {
+                        $(".apertium-popup-translate").css("left",((curr_ev.pageX + x_offset).toString() + "px"))
+                    }
+                    
+                    if ((curr_ev.pageY + y_offset) < 0) {
+                        $(".apertium-popup-translate").css("top","5px")
+                    } else {
+                        $(".apertium-popup-translate").css("top",((curr_ev.pageY + y_offset).toString() + "px"))       
+                    }
                 }
                 
                 prev_x = curr_ev.pageX - window.pageXOffset
