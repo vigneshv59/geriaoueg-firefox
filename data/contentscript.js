@@ -3,6 +3,9 @@ var prev_x = -5
 var prev_y = -5
 var fr_x = 0
 var to_x = 0
+var first_stop = true
+var not_emitted = true
+var enabled = true
 var escapeChars = {
    "&": "&amp;",
    "<": "&lt;",
@@ -25,7 +28,7 @@ $(document).mousemove(function(event) {
     curr_ev = event
 });
 
-$(document).mousestop(function() {
+function mouse_hover() {
     if (curr_ev) {
 
         var elem = $(document.elementFromPoint((curr_ev.pageX - window.pageXOffset), curr_ev.pageY - window.pageYOffset));
@@ -107,7 +110,31 @@ $(document).mousestop(function() {
             }
         }   
     }
+}
+
+$(document).mousestop(function() {
+    if(first_stop && not_emitted) {
+        not_emitted = false
+        self.port.emit("get-enable-state")
+    } else if (!first_stop) {
+        if (enabled) {
+            mouse_hover()
+        }
+    }
 });
+
+self.port.on("recieve-enable-state",function(enable_state) {
+    enabled = enable_state
+    first_stop = false
+    
+    if(enabled) {
+        mouse_hover()
+    }
+});
+
+self.port.on("prefchanged",function(enable_state) {
+    enabled = enable_state
+})
 
 function htmlEscape(string) {
     return String(string).replace(/[&<>]/g, function (s) {

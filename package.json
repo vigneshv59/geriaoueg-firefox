@@ -2,8 +2,21 @@
   "name": "geriaoueg-firefox",
   "title": "geriaoueg-firefox",
   "id": "jid1-tPBdHlBaH4QnAg",
-  "description": "a basic add-on",
+  "preferences": [{
+            "name": "apy_url",
+            "title": "Apertium APY",
+            "description": "Apertium APY URL",
+            "type": "string",
+            "value": "http://apy.projectjj.com"
+          }, {
+            "description": "Autotranslate (checked is on, unchecked is off)",
+            "type": "bool",
+            "name": "atrans_on",
+            "value": true,
+            "title": "Autotranslate"
+          }],
+  "description": "Apertium Translate",
   "author": "",
-  "license": "MPL 2.0",
+  "license": "GPL 2.0",
   "version": "0.1"
 }
