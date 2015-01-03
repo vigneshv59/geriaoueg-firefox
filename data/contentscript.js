@@ -6,6 +6,7 @@ var to_x = 0
 var first_stop = true
 var not_emitted = true
 var enabled = true
+var pref_apy_url = ""
 var escapeChars = {
    "&": "&amp;",
    "<": "&lt;",
@@ -130,6 +131,10 @@ self.port.on("recieve-enable-state",function(enable_state) {
     if(enabled) {
         mouse_hover()
     }
+});
+
+self.port.on("recieve-apy-url",function(apy_url) {
+    pref_apy_url = apy_url
 });
 
 self.port.on("prefchanged",function(enable_state) {

@@ -1,5 +1,6 @@
 var alllangs = {}
 var locales = {}
+var pref_apy_url
 
 function save_options() {
     var fr_lang = $("#from-lang").val()
@@ -22,6 +23,8 @@ self.port.on("recieve-stored-langs", function(stored_langs) {
         $("#from-lang").val(stored_langs["fr_lang"])
         $("#to-lang").val(stored_langs["to_lang"])
     }
+    $('#to-lang').trigger("chosen:updated");
+    $('#from-lang').trigger("chosen:updated");
 });
 
 self.port.on("recieve-enable-state",function(enable_state) {
@@ -33,10 +36,17 @@ self.port.on("recieve-enable-state",function(enable_state) {
     }
 });
 
+self.port.on("recieve-apy-url",function(apy_url) {
+    pref_apy_url = apy_url
+    download_languages()
+    restore_options()
+});
+
 function download_languages() {
     var xmlHttp = null;
     xmlHttp = new XMLHttpRequest();
-    xmlHttp.open( "GET", "http://apy.projectjj.com/listPairs", false );
+    
+    xmlHttp.open( "GET", URI(pref_apy_url) + URI("listPairs"), false );
     xmlHttp.send(null);
     var langs = JSON.parse(xmlHttp.responseText);
     langs = langs["responseData"]
@@ -52,15 +62,23 @@ function download_languages() {
         lang_codes.push(rd["targetLanguage"])
     });
     
-    var reqUrl = "http://apy.projectjj.com/listLanguageNames?locale=en&languages="
+    var codesstr = ""
     
     $.each(lang_codes, function(inx, code){
-        reqUrl = reqUrl + code
+        codesstr = codesstr + code
         if (inx < lang_codes.length - 1) {
-            reqUrl = reqUrl + "+"
+            codesstr = codesstr + "+"
         }
     });
     
+    xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", URI(pref_apy_url) + URI("getLocale"), false );
+    xmlHttp.send(null);
+    var langlocale = JSON.parse(xmlHttp.responseText);
+    langlocale = langlocale[0]
+    
+    langlocale = langlocale.split(/[-_]/)
+    var reqUrl = URI.decode(URI(pref_apy_url) + URI("listLanguageNames").addQuery("locale",langlocale[0]).addQuery("languages",codesstr))
     xmlHttp = new XMLHttpRequest();
     xmlHttp.open( "GET", reqUrl, false );
     xmlHttp.send(null);
@@ -73,7 +91,11 @@ function download_languages() {
         if(!text_lang) {
             var lang_arr = lang.split("_")
             text_lang = locales[lang_arr[0]]
-            text_lang = text_lang + " " + lang_arr[1]
+            if (!text_lang) {
+                text_lang = lang
+            } else {
+                text_lang = text_lang + " " + lang_arr[1]
+            }
         }
         
         $("#from-lang").append("<option value=\"" + lang + "\">" + text_lang + "</option>")
@@ -83,7 +105,11 @@ function download_languages() {
                 if(!to_text_lang) {
                     var to_lang_arr = l.split("_")
                     to_text_lang = locales[to_lang_arr[0]]
-                    to_text_lang = to_text_lang + " " + to_lang_arr[1]
+                    if (!to_text_lang) {
+                        to_text_lang = l
+                    } else {
+                        to_text_lang = to_text_lang + " " + to_lang_arr[1]
+                    }
                 }
                 $("#to-lang").append("<option value=\"" + l + "\">" + to_text_lang + "</option>")
                 to_lang[l] = 1
@@ -115,14 +141,17 @@ function update_selectboxes() {
     $.merge(new_list,$('#to-lang option[disabled=\'disabled\']'))
     $("#to-lang").empty().append(new_list);
     $("#to-lang").val($("#to-lang option[disabled!=\'disabled\']").val())
+    
+    $('#to-lang').trigger("chosen:updated");
+    $('#from-lang').trigger("chosen:updated");
 }
 
-$("#from-lang").change(function() {
+$("#from-lang").chosen().change(function() {
     update_selectboxes()
     save_options()
 });
 
-$("#to-lang").change(function() {
+$("#to-lang").chosen().change(function() {
     save_options()
 });
 
@@ -131,9 +160,11 @@ $("#enable-button").click(function() {
 })
 
 self.port.on("showpopup", function() {
+    $("#from-lang").chosen({height: "50%"}); 
+    $("#to-lang").chosen()
+    
     $("#from-lang").empty()
     $("#to-lang").empty()
-    download_languages()
-    restore_options()
+    
     self.port.emit("get-enable-state")
 });
