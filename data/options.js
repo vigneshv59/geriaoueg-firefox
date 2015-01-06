@@ -23,8 +23,7 @@ self.port.on("recieve-stored-langs", function(stored_langs) {
         $("#from-lang").val(stored_langs["fr_lang"])
         $("#to-lang").val(stored_langs["to_lang"])
     }
-    $('#to-lang').trigger("chosen:updated");
-    $('#from-lang').trigger("chosen:updated");
+    update_selectboxes();
 });
 
 self.port.on("recieve-enable-state",function(enable_state) {
@@ -141,17 +140,14 @@ function update_selectboxes() {
     $.merge(new_list,$('#to-lang option[disabled=\'disabled\']'))
     $("#to-lang").empty().append(new_list);
     $("#to-lang").val($("#to-lang option[disabled!=\'disabled\']").val())
-    
-    $('#to-lang').trigger("chosen:updated");
-    $('#from-lang').trigger("chosen:updated");
 }
 
-$("#from-lang").chosen().change(function() {
+$("#from-lang").change(function() {
     update_selectboxes()
     save_options()
 });
 
-$("#to-lang").chosen().change(function() {
+$("#to-lang").change(function() {
     save_options()
 });
 
@@ -160,9 +156,6 @@ $("#enable-button").click(function() {
 })
 
 self.port.on("showpopup", function() {
-    $("#from-lang").chosen({height: "50%"}); 
-    $("#to-lang").chosen()
-    
     $("#from-lang").empty()
     $("#to-lang").empty()
     
