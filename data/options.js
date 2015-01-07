@@ -21,9 +21,10 @@ function enable_disable() {
 self.port.on("recieve-stored-langs", function(stored_langs) {
     if (stored_langs["fr_lang"] && stored_langs["to_lang"]) {
         $("#from-lang").val(stored_langs["fr_lang"])
+        update_selectboxes();
+        
         $("#to-lang").val(stored_langs["to_lang"])
     }
-    update_selectboxes();
 });
 
 self.port.on("recieve-enable-state",function(enable_state) {
@@ -37,6 +38,13 @@ self.port.on("recieve-enable-state",function(enable_state) {
 
 self.port.on("recieve-apy-url",function(apy_url) {
     pref_apy_url = apy_url
+    if($("#to-lang").has("option") && $("#from-lang").has("option")) {
+        $("#from-lang").empty()
+        $("#to-lang").empty()
+    }
+    alllangs = {}
+    locales = {}
+    
     download_languages()
     restore_options()
 });
@@ -156,8 +164,6 @@ $("#enable-button").click(function() {
 })
 
 self.port.on("showpopup", function() {
-    $("#from-lang").empty()
-    $("#to-lang").empty()
-    
-    self.port.emit("get-enable-state")
+    self.port.emit("get-enable-state")    
+    restore_options()
 });
